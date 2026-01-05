@@ -4,7 +4,7 @@ from typing import Optional, Any, List
 
 from sqlalchemy import String, Float, Integer, ForeignKey, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.dialects.postgresql import ARRAY, JSONB
+from sqlalchemy import JSON, Text
 
 from app.db.base import Base
 
@@ -27,8 +27,8 @@ class Lattice(Base):
     # Volume
     volume: Mapped[float] = mapped_column(Float, nullable=False)
 
-    # Lattice matrix (3x3)
-    matrix: Mapped[Any] = mapped_column(JSONB, nullable=False)
+    # Lattice matrix (3x3) stored as JSON
+    matrix: Mapped[Any] = mapped_column(JSON, nullable=False)
 
     # Relationships
     structure: Mapped[Optional["Structure"]] = relationship(
@@ -60,7 +60,7 @@ class Structure(Base):
     crystal_system: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
 
     # Full structure as JSON (for quick serialization)
-    structure_json: Mapped[Optional[Any]] = mapped_column(JSONB, nullable=True)
+    structure_json: Mapped[Optional[Any]] = mapped_column(JSON, nullable=True)
 
     # CIF representation
     cif_string: Mapped[Optional[str]] = mapped_column(nullable=True)
@@ -93,20 +93,20 @@ class Site(Base):
     label: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     site_index: Mapped[int] = mapped_column(Integer, nullable=False)
 
-    # Coordinates
-    frac_coords: Mapped[List[float]] = mapped_column(
-        ARRAY(Float), nullable=False
-    )  # Fractional coordinates [x, y, z]
-    cart_coords: Mapped[List[float]] = mapped_column(
-        ARRAY(Float), nullable=False
-    )  # Cartesian coordinates [x, y, z]
+    # Coordinates stored as JSON for SQLite compatibility
+    frac_coords: Mapped[str] = mapped_column(
+        Text, nullable=False
+    )  # Fractional coordinates [x, y, z] as JSON
+    cart_coords: Mapped[str] = mapped_column(
+        Text, nullable=False
+    )  # Cartesian coordinates [x, y, z] as JSON
 
     # Occupancy (for disordered structures)
     occupancy: Mapped[float] = mapped_column(Float, default=1.0)
 
     # Additional properties
     properties: Mapped[Optional[Any]] = mapped_column(
-        JSONB, nullable=True
+        JSON, nullable=True
     )  # magnetic moment, charge, etc
 
     # Relationships

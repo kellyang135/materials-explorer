@@ -26,10 +26,14 @@ class RedisCache:
 
     async def get(self, key: str) -> Optional[Any]:
         """Get value from cache."""
-        client = await self.get_client()
-        value = await client.get(key)
-        if value:
-            return json.loads(value)
+        try:
+            client = await self.get_client()
+            value = await client.get(key)
+            if value:
+                return json.loads(value)
+        except Exception:
+            # Redis not available, skip caching
+            pass
         return None
 
     async def set(
@@ -39,14 +43,22 @@ class RedisCache:
         ttl: Optional[int] = None,
     ) -> None:
         """Set value in cache with optional TTL."""
-        client = await self.get_client()
-        ttl = ttl or settings.CACHE_TTL_SECONDS
-        await client.set(key, json.dumps(value), ex=ttl)
+        try:
+            client = await self.get_client()
+            ttl = ttl or settings.CACHE_TTL_SECONDS
+            await client.set(key, json.dumps(value), ex=ttl)
+        except Exception:
+            # Redis not available, skip caching
+            pass
 
     async def delete(self, key: str) -> None:
         """Delete key from cache."""
-        client = await self.get_client()
-        await client.delete(key)
+        try:
+            client = await self.get_client()
+            await client.delete(key)
+        except Exception:
+            # Redis not available, skip caching
+            pass
 
     async def clear_pattern(self, pattern: str) -> None:
         """Clear all keys matching pattern."""

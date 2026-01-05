@@ -5,7 +5,7 @@ from typing import Optional, Any
 
 from sqlalchemy import String, Float, Integer, DateTime, ForeignKey, Text, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import JSON
 
 from app.db.base import Base
 
@@ -29,7 +29,7 @@ class Property(Base):
     # Value storage
     value_numeric: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     value_string: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    value_json: Mapped[Optional[Any]] = mapped_column(JSONB, nullable=True)
+    value_json: Mapped[Optional[Any]] = mapped_column(JSON, nullable=True)
     unit: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
 
     # Uncertainty
@@ -83,12 +83,12 @@ class Calculation(Base):
         String(50), nullable=True
     )  # static, relax, etc.
     is_hubbard: Mapped[bool] = mapped_column(default=False)
-    hubbard_u: Mapped[Optional[Any]] = mapped_column(JSONB, nullable=True)
+    hubbard_u: Mapped[Optional[Any]] = mapped_column(JSON, nullable=True)
 
     # Convergence info
     is_converged: Mapped[bool] = mapped_column(default=True)
     energy_cutoff: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    kpoints: Mapped[Optional[Any]] = mapped_column(JSONB, nullable=True)
+    kpoints: Mapped[Optional[Any]] = mapped_column(JSON, nullable=True)
 
     # Computed values
     energy: Mapped[Optional[float]] = mapped_column(Float, nullable=True)

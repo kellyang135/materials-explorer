@@ -27,9 +27,11 @@ class Settings(BaseSettings):
     POSTGRES_PORT: int = 5432
     POSTGRES_DB: str = "materials_explorer"
 
+    DATABASE_URL: str = "sqlite+aiosqlite:///./materials.db"
+
     @property
-    def DATABASE_URL(self) -> str:
-        """construct async database URL"""
+    def DATABASE_URL_PG(self) -> str:
+        """construct async postgresql database URL"""
         return (
             f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
             f"@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"

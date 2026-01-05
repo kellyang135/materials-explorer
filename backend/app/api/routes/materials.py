@@ -168,7 +168,39 @@ async def get_material_structure(
             detail=f"Structure not found for material {material_id}"
         )
 
-    return StructureResponse.model_validate(structure)
+    # Convert JSON string coordinates to lists for response
+    import json
+    
+    # Parse sites and convert coordinates
+    sites_data = []
+    for site in structure.sites:
+        site_dict = {
+            'id': site.id,
+            'site_index': site.site_index,
+            'species': site.species,
+            'frac_coords': json.loads(site.frac_coords) if isinstance(site.frac_coords, str) else site.frac_coords,
+            'cart_coords': json.loads(site.cart_coords) if isinstance(site.cart_coords, str) else site.cart_coords,
+            'occupancy': site.occupancy,
+            'label': site.label,
+            'properties': site.properties
+        }
+        sites_data.append(site_dict)
+    
+    # Build response manually
+    response_data = {
+        'id': structure.id,
+        'num_sites': structure.num_sites,
+        'is_ordered': structure.is_ordered,
+        'spacegroup_number': structure.spacegroup_number,
+        'spacegroup_symbol': structure.spacegroup_symbol,
+        'point_group': structure.point_group,
+        'crystal_system': structure.crystal_system,
+        'lattice': structure.lattice,
+        'sites': sites_data,
+        'cif_string': structure.cif_string
+    }
+    
+    return StructureResponse(**response_data)
 
 
 @router.post("", response_model=MaterialResponse, status_code=201)

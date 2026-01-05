@@ -37,13 +37,36 @@ class SiteBase(BaseModel):
     properties: Optional[Any] = None
 
 
-class SiteResponse(SiteBase):
+class SiteResponse(BaseModel):
     """site response schema"""
 
     model_config = ConfigDict(from_attributes=True)
 
     id: int
     site_index: int
+    species: str
+    frac_coords: List[float]
+    cart_coords: List[float]
+    occupancy: float = 1.0
+    label: Optional[str] = None
+    properties: Optional[Any] = None
+
+    @classmethod
+    def model_validate(cls, obj, **kwargs):
+        if hasattr(obj, 'frac_coords') and isinstance(obj.frac_coords, str):
+            import json
+            data = {
+                'id': obj.id,
+                'site_index': obj.site_index,
+                'species': obj.species,
+                'frac_coords': json.loads(obj.frac_coords),
+                'cart_coords': json.loads(obj.cart_coords),
+                'occupancy': obj.occupancy,
+                'label': obj.label,
+                'properties': obj.properties
+            }
+            return cls(**data)
+        return super().model_validate(obj, **kwargs)
 
 
 class StructureBase(BaseModel):

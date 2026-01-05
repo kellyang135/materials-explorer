@@ -14,7 +14,7 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.dialects.postgresql import ARRAY, JSONB
+from sqlalchemy import JSON
 
 from app.db.base import Base
 
@@ -76,9 +76,9 @@ class Material(Base):
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
     )
 
-    # Vector embedding for similarity search (pgvector)
-    structure_embedding: Mapped[Optional[List[float]]] = mapped_column(
-        ARRAY(Float), nullable=True
+    # Vector embedding for similarity search (stored as JSON for SQLite compatibility)
+    structure_embedding: Mapped[Optional[str]] = mapped_column(
+        Text, nullable=True
     )
 
     # Relationships
