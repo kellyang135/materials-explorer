@@ -2,12 +2,9 @@ import React, { useState, useEffect } from 'react';
 import {
   Box,
   Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
+  Card,
+  CardContent,
+  CardActionArea,
   Typography,
   TextField,
   Button,
@@ -19,10 +16,20 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  CircularProgress
+  CircularProgress,
+  Stack,
+  Avatar,
+  Divider,
+  IconButton,
+  Fade,
+  Grow
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import SearchIcon from '@mui/icons-material/Search';
+import ScienceIcon from '@mui/icons-material/Science';
+import ViewInArIcon from '@mui/icons-material/ViewInAr';
+import ClearIcon from '@mui/icons-material/Clear';
+import FilterListIcon from '@mui/icons-material/FilterList';
 import MaterialsAPI from '../services/api';
 import { Material, SearchResponse } from '../types/api';
 
@@ -81,171 +88,337 @@ const MaterialsBrowser: React.FC = () => {
     setPage(1);
   };
 
+  // Get crystal system color for visual variety
+  const getCrystalSystemColor = (system: string) => {
+    const colors = {
+      cubic: '#4A7C59',
+      tetragonal: '#8B5A3C', 
+      orthorhombic: '#5A8B73',
+      hexagonal: '#2D5A3D',
+      trigonal: '#6B7A4F',
+      monoclinic: '#A67C5A',
+      triclinic: '#7B6B4F',
+    };
+    return colors[system as keyof typeof colors] || '#5A6B5A';
+  };
+
   return (
-    <Box component="div">
-      <Typography variant="h4" component="h1" gutterBottom>
-        Materials Database
-      </Typography>
-      
-      {/* Search and Filters */}
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Grid container spacing={3} alignItems="center">
-          <Grid item xs={12} md={4}>
-            <TextField
-              fullWidth
-              label="Search"
-              placeholder="Formula, material ID..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Grid>
-          
-          <Grid item xs={12} md={3}>
-            <TextField
-              fullWidth
-              label="Elements"
-              placeholder="Si,O"
-              value={elements}
-              onChange={(e) => setElements(e.target.value)}
-              helperText="Comma-separated"
-            />
-          </Grid>
-          
-          <Grid item xs={12} md={3}>
-            <FormControl fullWidth>
-              <InputLabel>Crystal System</InputLabel>
-              <Select
-                value={crystalSystem}
-                label="Crystal System"
-                onChange={(e) => setCrystalSystem(e.target.value)}
-              >
-                <MenuItem value="">All</MenuItem>
-                <MenuItem value="cubic">Cubic</MenuItem>
-                <MenuItem value="tetragonal">Tetragonal</MenuItem>
-                <MenuItem value="orthorhombic">Orthorhombic</MenuItem>
-                <MenuItem value="hexagonal">Hexagonal</MenuItem>
-                <MenuItem value="trigonal">Trigonal</MenuItem>
-                <MenuItem value="monoclinic">Monoclinic</MenuItem>
-                <MenuItem value="triclinic">Triclinic</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          
-          <Grid item xs={12} md={2}>
-            <Box component="div" sx={{ display: 'flex', gap: 1 }}>
+    <Fade in timeout={800}>
+      <Box>
+        {/* Zen-inspired page header */}
+        <Box sx={{ mb: 4, textAlign: 'center' }}>
+          <Typography 
+            variant="h4" 
+            component="h1" 
+            gutterBottom
+            sx={{
+              background: 'linear-gradient(135deg, #0D4E41 0%, #4A7C59 100%)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              color: 'transparent',
+              fontWeight: 300,
+              mb: 1,
+            }}
+          >
+            Explore Materials
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 600, mx: 'auto' }}>
+            Discover crystal structures and properties from our curated database
+          </Typography>
+        </Box>
+
+        {/* Elegant Search Section */}
+        <Card sx={{ 
+          mb: 4, 
+          background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(250,251,250,0.9) 100%)',
+          backdropFilter: 'blur(20px)',
+        }}>
+          <CardContent sx={{ p: 4 }}>
+            <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
+              <Avatar sx={{ bgcolor: 'primary.main' }}>
+                <FilterListIcon />
+              </Avatar>
+              <Typography variant="h6" color="primary.main">
+                Search & Filter
+              </Typography>
+            </Stack>
+
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={5}>
+                <TextField
+                  fullWidth
+                  label="Search Materials"
+                  placeholder="Formula, material ID..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon color="primary" />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        boxShadow: '0 4px 12px rgba(13, 78, 65, 0.15)',
+                      },
+                    },
+                  }}
+                />
+              </Grid>
+              
+              <Grid item xs={12} md={3}>
+                <TextField
+                  fullWidth
+                  label="Elements"
+                  placeholder="Si, O, Fe..."
+                  value={elements}
+                  onChange={(e) => setElements(e.target.value)}
+                  helperText="Comma-separated"
+                />
+              </Grid>
+              
+              <Grid item xs={12} md={4}>
+                <FormControl fullWidth>
+                  <InputLabel>Crystal System</InputLabel>
+                  <Select
+                    value={crystalSystem}
+                    label="Crystal System"
+                    onChange={(e) => setCrystalSystem(e.target.value)}
+                  >
+                    <MenuItem value="">All Systems</MenuItem>
+                    <MenuItem value="cubic">Cubic</MenuItem>
+                    <MenuItem value="tetragonal">Tetragonal</MenuItem>
+                    <MenuItem value="orthorhombic">Orthorhombic</MenuItem>
+                    <MenuItem value="hexagonal">Hexagonal</MenuItem>
+                    <MenuItem value="trigonal">Trigonal</MenuItem>
+                    <MenuItem value="monoclinic">Monoclinic</MenuItem>
+                    <MenuItem value="triclinic">Triclinic</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+
+            <Stack direction="row" spacing={2} sx={{ mt: 3, justifyContent: 'center' }}>
               <Button 
                 variant="contained" 
                 onClick={handleSearch}
-                fullWidth
+                startIcon={<SearchIcon />}
+                sx={{ minWidth: 120 }}
               >
                 Search
               </Button>
               <Button 
                 variant="outlined" 
                 onClick={handleClearFilters}
-                fullWidth
+                startIcon={<ClearIcon />}
+                sx={{ minWidth: 120 }}
               >
-                Clear
+                Clear Filters
               </Button>
-            </Box>
-          </Grid>
-        </Grid>
-      </Paper>
+            </Stack>
+          </CardContent>
+        </Card>
 
-      {/* Results */}
-      <Paper>
-        <Box component="div" sx={{ p: 2 }}>
-          <Typography variant="h6" gutterBottom>
+        {/* Results Summary */}
+        <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Typography variant="h6" color="text.primary">
             {total} materials found
           </Typography>
-          
-          {loading ? (
-            <Box component="div" sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-              <CircularProgress />
-            </Box>
-          ) : (
-            <>
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Material ID</TableCell>
-                      <TableCell>Formula</TableCell>
-                      <TableCell>Chemical System</TableCell>
-                      <TableCell>Crystal System</TableCell>
-                      <TableCell>Elements</TableCell>
-                      <TableCell>Density</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {materials.map((material) => (
-                      <TableRow key={material.id} hover>
-                        <TableCell>
-                          <Button
-                            component={RouterLink}
-                            to={`/materials/${material.material_id}`}
-                            variant="text"
-                            color="primary"
-                          >
-                            {material.material_id}
-                          </Button>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body1">
-                            {material.formula_pretty}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>{material.chemsys}</TableCell>
-                        <TableCell>
-                          {material.crystal_system && (
-                            <Chip 
-                              label={material.crystal_system} 
-                              size="small" 
-                              variant="outlined"
-                            />
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <Chip 
-                            label={`${material.nelements} elements`} 
-                            size="small"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          {material.density 
-                            ? `${material.density.toFixed(2)} g/cm³` 
-                            : 'N/A'
-                          }
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-              
-              {totalPages > 1 && (
-                <Box component="div" sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-                  <Pagination
-                    count={totalPages}
-                    page={page}
-                    onChange={(_, value) => setPage(value)}
-                    color="primary"
-                  />
-                </Box>
-              )}
-            </>
+          {totalPages > 1 && (
+            <Pagination
+              count={totalPages}
+              page={page}
+              onChange={(_, value) => setPage(value)}
+              color="primary"
+              size="large"
+            />
           )}
         </Box>
-      </Paper>
-    </Box>
+
+        {/* Beautiful Material Cards */}
+        {loading ? (
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column',
+            alignItems: 'center', 
+            justifyContent: 'center',
+            p: 8,
+          }}>
+            <CircularProgress size={60} sx={{ mb: 2 }} />
+            <Typography variant="body1" color="text.secondary">
+              Loading materials...
+            </Typography>
+          </Box>
+        ) : (
+          <Grid container spacing={3}>
+            {materials.map((material, index) => (
+              <Grow 
+                key={material.id} 
+                in 
+                timeout={600 + index * 100}
+                style={{ transformOrigin: '50% 0 0' }}
+              >
+                <Grid item xs={12} sm={6} lg={4} xl={3}>
+                  <Card
+                    component={RouterLink}
+                    to={`/materials/${material.material_id}`}
+                    sx={{
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      cursor: 'pointer',
+                      textDecoration: 'none',
+                      position: 'relative',
+                      '&:hover': {
+                        transform: 'translateY(-8px)',
+                        boxShadow: '0 12px 40px rgba(13, 78, 65, 0.2)',
+                      },
+                      '&:before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: '4px',
+                        background: `linear-gradient(90deg, ${getCrystalSystemColor(material.crystal_system || 'cubic')} 0%, rgba(255,255,255,0) 100%)`,
+                        borderRadius: '20px 20px 0 0',
+                      }
+                    }}
+                  >
+                    <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                      {/* Material Header */}
+                      <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
+                        <Avatar 
+                          sx={{ 
+                            bgcolor: getCrystalSystemColor(material.crystal_system || 'cubic'),
+                            width: 48,
+                            height: 48,
+                          }}
+                        >
+                          <ViewInArIcon />
+                        </Avatar>
+                        <Box>
+                          <Typography variant="h6" color="primary.main" sx={{ fontWeight: 500 }}>
+                            {material.material_id}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Materials Project ID
+                          </Typography>
+                        </Box>
+                      </Stack>
+
+                      {/* Chemical Formula */}
+                      <Box sx={{ mb: 2 }}>
+                        <Typography 
+                          variant="h5" 
+                          sx={{ 
+                            fontWeight: 300, 
+                            color: 'text.primary',
+                            fontFamily: 'monospace',
+                            letterSpacing: '0.5px',
+                          }}
+                        >
+                          {material.formula_pretty}
+                        </Typography>
+                      </Box>
+
+                      <Divider sx={{ my: 2 }} />
+
+                      {/* Material Properties */}
+                      <Stack spacing={2}>
+                        {/* Chemical System */}
+                        <Box>
+                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                            Chemical System
+                          </Typography>
+                          <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                            {material.chemsys}
+                          </Typography>
+                        </Box>
+
+                        {/* Crystal System & Elements */}
+                        <Stack direction="row" spacing={2}>
+                          <Box sx={{ flex: 1 }}>
+                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                              Crystal System
+                            </Typography>
+                            {material.crystal_system ? (
+                              <Chip 
+                                label={material.crystal_system}
+                                size="small"
+                                sx={{
+                                  bgcolor: getCrystalSystemColor(material.crystal_system),
+                                  color: 'white',
+                                  fontWeight: 500,
+                                  mt: 0.5,
+                                }}
+                              />
+                            ) : (
+                              <Typography variant="body2" color="text.secondary">
+                                Unknown
+                              </Typography>
+                            )}
+                          </Box>
+                          
+                          <Box sx={{ flex: 1 }}>
+                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                              Elements
+                            </Typography>
+                            <Chip 
+                              label={`${material.nelements || 0} elements`}
+                              size="small"
+                              variant="outlined"
+                              sx={{ mt: 0.5 }}
+                            />
+                          </Box>
+                        </Stack>
+
+                        {/* Density */}
+                        {material.density && (
+                          <Box>
+                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                              Density
+                            </Typography>
+                            <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                              {material.density.toFixed(2)} g/cm³
+                            </Typography>
+                          </Box>
+                        )}
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              </Grow>
+            ))}
+          </Grid>
+        )}
+
+        {/* Bottom Pagination */}
+        {totalPages > 1 && !loading && (
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            mt: 6,
+            p: 3,
+          }}>
+            <Pagination
+              count={totalPages}
+              page={page}
+              onChange={(_, value) => setPage(value)}
+              color="primary"
+              size="large"
+              showFirstButton
+              showLastButton
+            />
+          </Box>
+        )}
+      </Box>
+    </Fade>
   );
 };
 
