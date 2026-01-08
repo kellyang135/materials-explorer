@@ -211,7 +211,7 @@ class MaterialsProjectClient:
 
 
 async def main():
-    """example usage of the Materials Project client""""
+    """example usage of the Materials Project client"""
     client = MaterialsProjectClient()
 
     # Search for iron oxides

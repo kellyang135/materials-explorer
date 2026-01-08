@@ -20,14 +20,15 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     DEBUG: bool = False
 
-    # Database
+    # Database - SQLite for local development  
+    DATABASE_URL: str = "sqlite+aiosqlite:///materials_explorer.db"
+    
+    # PostgreSQL settings (for future Docker deployment)
     POSTGRES_USER: str = "materials"
     POSTGRES_PASSWORD: str = "materials_dev"
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: int = 5432
     POSTGRES_DB: str = "materials_explorer"
-
-    DATABASE_URL: str = "sqlite+aiosqlite:///./materials.db"
 
     @property
     def DATABASE_URL_PG(self) -> str:
@@ -56,7 +57,7 @@ class Settings(BaseSettings):
         return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
 
     # Materials Project API
-    MP_API_KEY: str = ""
+    MP_API_KEY: str = "4qLIaDzBfyUgYLrnh6mu9tOsGbAshwYG"
     MP_API_BASE_URL: str = "https://api.materialsproject.org"
 
     # CORS

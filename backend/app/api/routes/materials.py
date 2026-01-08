@@ -1,5 +1,6 @@
 """materials CRUD API routes"""
 
+import logging
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -23,6 +24,7 @@ from app.schemas.structure import StructureResponse
 from app.core.cache import cache
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.get("", response_model=MaterialListResponse)
@@ -32,9 +34,12 @@ async def list_materials(
     db: AsyncSession = Depends(get_db),
 ):
     """list all materials with pagination"""
+    logger.info(f"GET /materials - page={page}, page_size={page_size}")
+    
     # Get total count
     count_query = select(func.count(Material.id))
     total = (await db.execute(count_query)).scalar()
+    logger.info(f"Total materials in database: {total}")
 
     # Get paginated results
     offset = (page - 1) * page_size
@@ -46,14 +51,17 @@ async def list_materials(
     )
     result = await db.execute(query)
     materials = result.scalars().all()
+    logger.info(f"Retrieved {len(materials)} materials for page {page}")
 
-    return MaterialListResponse(
+    response = MaterialListResponse(
         items=[MaterialResponse.model_validate(m) for m in materials],
         total=total,
         page=page,
         page_size=page_size,
         pages=(total + page_size - 1) // page_size,
     )
+    logger.info(f"Returning response with {len(response.items)} items, total={response.total}")
+    return response
 
 
 @router.get("/{material_id}", response_model=MaterialDetailResponse)
@@ -62,12 +70,17 @@ async def get_material(
     db: AsyncSession = Depends(get_db),
 ):
     """get a material by its ID (such as mp-1234)"""
+    logger.info(f"GET /materials/{material_id}")
+    
     # Try cache first
     cache_key = f"material:{material_id}"
     cached = await cache.get(cache_key)
     if cached:
+        logger.info(f"Cache hit for material {material_id}")
         return MaterialDetailResponse(**cached)
 
+    logger.info(f"Cache miss for material {material_id}, querying database")
+    
     # Query database with compositions
     query = (
         select(Material)
@@ -78,12 +91,15 @@ async def get_material(
     material = result.scalar_one_or_none()
 
     if not material:
+        logger.warning(f"Material {material_id} not found in database")
         raise HTTPException(status_code=404, detail=f"Material {material_id} not found")
 
+    logger.info(f"Found material {material_id}: {material.formula}")
     response = MaterialDetailResponse.model_validate(material)
 
     # Cache the result
     await cache.set(cache_key, response.model_dump(mode="json"))
+    logger.info(f"Cached material {material_id}")
 
     return response
 

@@ -4,7 +4,6 @@ import {
   Box,
   Paper,
   Typography,
-  Grid,
   Card,
   CardContent,
   Chip,
@@ -20,9 +19,11 @@ import {
   Breadcrumbs,
   Link
 } from '@mui/material';
+import { Grid } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import MaterialsAPI from '../services/api';
 import { Material, Calculation, Structure } from '../types/api';
+import CrystalStructure3D from './Structure3D/CrystalStructure3D';
 
 const MaterialDetail: React.FC = () => {
   const { materialId } = useParams<{ materialId: string }>();
@@ -287,6 +288,23 @@ const MaterialDetail: React.FC = () => {
                 <Typography variant="h6" gutterBottom>
                   Crystal Structure
                 </Typography>
+                
+                {/* 3D Visualization */}
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    3D Structure Visualization
+                  </Typography>
+                  <CrystalStructure3D 
+                    structure={structure}
+                    height={400}
+                    showUnitCell={true}
+                    atomScale={0.3}
+                  />
+                  <Typography variant="caption" sx={{ mt: 1, display: 'block', textAlign: 'center' }}>
+                    Click and drag to rotate • Scroll to zoom • Right-click and drag to pan
+                  </Typography>
+                </Box>
+
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={6}>
                     <Typography variant="subtitle2" gutterBottom>

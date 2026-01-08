@@ -82,7 +82,7 @@ const MaterialsBrowser: React.FC = () => {
   };
 
   return (
-    <Box>
+    <Box component="div">
       <Typography variant="h4" component="h1" gutterBottom>
         Materials Database
       </Typography>
@@ -140,7 +140,7 @@ const MaterialsBrowser: React.FC = () => {
           </Grid>
           
           <Grid item xs={12} md={2}>
-            <Box sx={{ display: 'flex', gap: 1 }}>
+            <Box component="div" sx={{ display: 'flex', gap: 1 }}>
               <Button 
                 variant="contained" 
                 onClick={handleSearch}
@@ -162,13 +162,13 @@ const MaterialsBrowser: React.FC = () => {
 
       {/* Results */}
       <Paper>
-        <Box sx={{ p: 2 }}>
+        <Box component="div" sx={{ p: 2 }}>
           <Typography variant="h6" gutterBottom>
             {total} materials found
           </Typography>
           
           {loading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+            <Box component="div" sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
               <CircularProgress />
             </Box>
           ) : (
@@ -232,7 +232,7 @@ const MaterialsBrowser: React.FC = () => {
               </TableContainer>
               
               {totalPages > 1 && (
-                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                <Box component="div" sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
                   <Pagination
                     count={totalPages}
                     page={page}
