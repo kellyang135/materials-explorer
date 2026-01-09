@@ -39,19 +39,54 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    // Medium's elegant font stack
+    fontFamily: 'Charter, "Droid Serif", Georgia, Cambria, "Times New Roman", serif',
     h1: {
-      fontWeight: 300,
+      fontFamily: '"Playfair Display", Charter, Georgia, serif',
+      fontWeight: 400,
       letterSpacing: '-0.02em',
     },
+    h2: {
+      fontFamily: '"Playfair Display", Charter, Georgia, serif',
+      fontWeight: 400,
+      letterSpacing: '-0.01em',
+    },
+    h3: {
+      fontFamily: '"Playfair Display", Charter, Georgia, serif',
+      fontWeight: 400,
+    },
     h4: {
+      fontFamily: '"Playfair Display", Charter, Georgia, serif',
       fontWeight: 400,
       letterSpacing: '-0.01em',
       color: '#0D4E41',
     },
+    h5: {
+      fontFamily: '"Playfair Display", Charter, Georgia, serif',
+      fontWeight: 400,
+    },
     h6: {
-      fontWeight: 500,
+      fontFamily: '"Source Sans Pro", "Helvetica Neue", Helvetica, Arial, sans-serif',
+      fontWeight: 600,
       letterSpacing: '0.01em',
+      textTransform: 'uppercase',
+      fontSize: '0.75rem',
+    },
+    body1: {
+      fontFamily: 'Charter, "Droid Serif", Georgia, Cambria, "Times New Roman", serif',
+      fontSize: '1.1rem',
+      lineHeight: 1.6,
+      letterSpacing: '0.01em',
+    },
+    body2: {
+      fontFamily: '"Source Sans Pro", "Helvetica Neue", Helvetica, Arial, sans-serif',
+      fontSize: '0.95rem',
+      lineHeight: 1.5,
+    },
+    button: {
+      fontFamily: '"Source Sans Pro", "Helvetica Neue", Helvetica, Arial, sans-serif',
+      fontWeight: 500,
+      letterSpacing: '0.02em',
     },
   },
   shape: {
