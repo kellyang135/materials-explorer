@@ -165,12 +165,17 @@ async def store_material(session, material_data, elements_db):
     return material
 
 async def import_materials():
-    """Import materials from mp_materials.json."""
+    """Import materials from diverse_materials.json or mp_materials.json."""
     
-    # Load JSON data
-    json_file = Path("mp_materials.json")
-    if not json_file.exists():
-        print(f"❌ {json_file} not found. Please run load_mp_materials.py first.")
+    # Try to load enhanced diverse materials first, fall back to old format
+    json_file = None
+    for filename in ["diverse_materials.json", "mp_materials.json"]:
+        if Path(filename).exists():
+            json_file = Path(filename)
+            break
+    
+    if not json_file:
+        print(f"❌ No materials data file found. Please run load_diverse_materials.py or load_mp_materials.py first.")
         return False
     
     with open(json_file) as f:

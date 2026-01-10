@@ -190,12 +190,20 @@ const MLPredictor: React.FC = () => {
       }
 
       if (materialForPrediction) {
-        // Use the material's structure
-        const materialDetail = await MaterialsAPI.getMaterial(materialForPrediction.material_id);
-        if (materialDetail.structure) {
-          requestData.structure_json = materialDetail.structure.structure_json;
-        } else {
-          throw new Error('Selected material has no structure data');
+        // Get the material's structure using the correct API endpoint
+        try {
+          const structureData = await MaterialsAPI.getMaterialStructure(materialForPrediction.material_id);
+          // Convert the structure to the format expected by the prediction API
+          requestData.structure_json = {
+            lattice: structureData.lattice,
+            sites: structureData.sites.map(site => ({
+              species: [{ element: site.species, occu: site.occupancy }],
+              abc: site.frac_coords,
+              xyz: site.cart_coords
+            }))
+          };
+        } catch (err) {
+          throw new Error(`Could not load structure for ${materialForPrediction.formula_pretty}: ${err}`);
         }
       } else if (structureJson.trim()) {
         try {

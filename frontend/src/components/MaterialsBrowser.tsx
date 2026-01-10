@@ -22,7 +22,9 @@ import {
   Divider,
   IconButton,
   Fade,
-  Grow
+  Grow,
+  Switch,
+  FormControlLabel
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import SearchIcon from '@mui/icons-material/Search';
@@ -32,6 +34,9 @@ import ClearIcon from '@mui/icons-material/Clear';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import MaterialsAPI from '../services/api';
 import { Material, SearchResponse } from '../types/api';
+import { explorationTracker } from '../services/explorationTracker';
+import ExplorationDebug from './ExplorationDebug';
+import ExplorationBreadcrumb from './ExplorationBreadcrumb';
 
 const MaterialsBrowser: React.FC = () => {
   const [materials, setMaterials] = useState<Material[]>([]);
@@ -42,6 +47,11 @@ const MaterialsBrowser: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [elements, setElements] = useState('');
   const [crystalSystem, setCrystalSystem] = useState('');
+  const [isGuidedMode, setIsGuidedMode] = useState(() => {
+    // Initialize from localStorage to persist across navigation
+    const saved = localStorage.getItem('materials_guided_mode');
+    return saved === 'true';
+  });
 
   const pageSize = 20;
 
@@ -77,6 +87,17 @@ const MaterialsBrowser: React.FC = () => {
   };
 
   const handleSearch = () => {
+    // Track search behavior
+    if (searchQuery) {
+      explorationTracker.trackSearch(searchQuery);
+    }
+    if (elements) {
+      explorationTracker.trackFilter('elements', elements);
+    }
+    if (crystalSystem) {
+      explorationTracker.trackFilter('crystal_system', crystalSystem);
+    }
+    
     setPage(1);
     loadMaterials();
   };
@@ -126,6 +147,45 @@ const MaterialsBrowser: React.FC = () => {
             Discover crystal structures and properties from our curated database
           </Typography>
         </Box>
+
+        {/* Guided Discovery Mode Toggle */}
+        <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={isGuidedMode}
+                onChange={(e) => {
+                  const newValue = e.target.checked;
+                  setIsGuidedMode(newValue);
+                  localStorage.setItem('materials_guided_mode', newValue.toString());
+                }}
+                color="primary"
+              />
+            }
+            label={
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                  🧭 Guided Discovery Mode
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {isGuidedMode ? 'Track your exploration journey' : 'Enable smart exploration assistance'}
+                </Typography>
+              </Stack>
+            }
+            sx={{
+              background: isGuidedMode ? 'linear-gradient(135deg, rgba(13, 78, 65, 0.1) 0%, rgba(74, 124, 89, 0.1) 100%)' : 'transparent',
+              borderRadius: 2,
+              px: 2,
+              py: 1,
+              border: isGuidedMode ? '1px solid' : '1px solid transparent',
+              borderColor: isGuidedMode ? 'primary.light' : 'transparent',
+              transition: 'all 0.3s ease'
+            }}
+          />
+        </Box>
+
+        {/* Exploration Breadcrumb Trail */}
+        <ExplorationBreadcrumb isGuidedMode={isGuidedMode} />
 
         {/* Elegant Search Section */}
         <Card sx={{ 
@@ -266,6 +326,14 @@ const MaterialsBrowser: React.FC = () => {
                   <Card
                     component={RouterLink}
                     to={`/materials/${material.material_id}`}
+                    onClick={() => {
+                      // Track material view for guided discovery
+                      explorationTracker.trackMaterialView(
+                        material.material_id,
+                        material.formula_pretty,
+                        material.crystal_system
+                      );
+                    }}
                     sx={{
                       height: '100%',
                       display: 'flex',
@@ -417,6 +485,9 @@ const MaterialsBrowser: React.FC = () => {
             />
           </Box>
         )}
+
+        {/* Debug Panel for Testing Exploration Tracking */}
+        <ExplorationDebug />
       </Box>
     </Fade>
   );
